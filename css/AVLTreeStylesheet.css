@@ -1,0 +1,50 @@
+/*
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+h1 {
+	text-align: center;
+}
+
+#mainBoard {
+	position: relative;
+	border: 1px solid black;
+	height: 400px;
+	width: 800px;
+	margin: auto;
+	text-align: center;
+	overflow: scroll;
+}
+
+#interface {
+	margin: 10px;
+	text-align: center;
+}
+
+.treeNode {
+	position: absolute;
+	height: 40px;
+	width: 40px;
+	border-radius: 100%;
+	border: 2px solid black;
+	background-color: #ff6600;
+	font: 20px Arial,Sans-serif;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.line {
+	position: absolute;
+	height: 2px;
+	width: 40px;
+	background-color: #000000;
+}

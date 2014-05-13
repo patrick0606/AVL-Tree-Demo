@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>AVL Tree Visualization - HTML5</title>
+		<meta name="author" content="Po-Han Huang">
+		<meta name="keywords" content="AVL Tree, Binary Search Tree, Data structure">
+		<meta name="description" content="AVL tree visualization in HTML5">
+		<link rel="stylesheet" href="AVLTreeStylesheet.css">
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenMax.min.js"></script>
+		<script src="AVLTree.js"></script>
+		<script src="AVLTreeDisplay.js"></script>
+		<script src="AVLTreeControl.js"></script>
+		<script>
+		</script>
+	</head>
+	<body onload="AVLTreeControl.init()">
+		<h1>AVL Tree Visualiztion</h1>
+		<div id="mainBoard">
+			
+		</div>
+		<div id="interface">
+			<form>
+				<input type="text" name="input" id="input">
+				<input type="button" onclick="AVLTreeControl.insert()" value="insert">
+				<input type="button" onclick="AVLTreeControl.remove()" value="remove">
+				
+			</form>
+		</div>
+		<footer>
+			
+		</footer>
+	</body>
+</html>
