@@ -1,22 +1,90 @@
-/*
+/**
+ * AVLTree.js
  * 
+ * Copyright (c) 2014 Patrick Huang. All rights reserved.
  * 
+ * Distributed under GNU General Public License v2. 
+ * http://www.gnu.org/licenses/gpl.html
  * 
+ * @file 
  * 
- * 
- * 
- * 
- * 
- * 
- * 
+ * @author Patrick Huang <phuang17@illinois.edu>
  * 
  * 
  */
 
+var AVLTree = (function(){
+	var Settings = function(){
+		this.balanceEnabled = true;
+		this.deleteMode = -1;
+		this.orientation = 1;
+	};
+	
+	var TreeNode = function(key,data,parent){
+		this.key = key;
+		this.data = data;
+		this.left = null;
+		this.right = null;
+		this.parent = parent !== undefined ? parent : null;
+		this.height = 0;
+	};
+	
+	function _c(){
+		this.root = null;
+		this.settings = new Settings();
+	};
+		_c.root = null;
+		_c.settings = new Settings();
+	
+	_c.preOrderTraversal = _c.prototype.preOrderTraversal = function(shout,arguement,croot){
+		if(typeof shout === "function"){
+			croot = croot || this.root;
+			shout(croot,arguement);
+			if(croot.left !== null){
+				_c.preOrderTraversal(shout,argument,croot.left);
+			}
+			if(croot.right !== null){
+				_c.preOrderTraversal(shout,argument,croot.right);
+			}
+		}
+	};
+	
+	_c.inOrderTraversal = _c.prototype.inOrderTraversal = function(shout,arguement,croot){
+		if(typeof shout === "function"){
+			croot = croot || this.root;
+			if(croot.left !== null){
+				_c.preOrderTraversal(shout,argument,croot.left);
+			}
+			shout(croot,arguement);
+			if(croot.right !== null){
+				_c.preOrderTraversal(shout,argument,croot.right);
+			}
+		}
+	};
+	
+	_c.postOrderTraversal = _c.prototype.postOrderTraversal = function(shout,arguement,croot){
+		if(typeof shout === "function"){
+			croot = croot || this.root;
+			if(croot.left !== null){
+				_c.preOrderTraversal(shout,argument,croot.left);
+			}
+			if(croot.right !== null){
+				_c.preOrderTraversal(shout,argument,croot.right);
+			}
+			shout(croot,arguement);
+		}
+	};
+	
+	
+	
+	return _c;
+})();
+
+
 var AVLTreeSettings = {
-	balanceEnabled : true,		/* boolean: if the tree is to bebalanced.       */
-	deleteMode : -1,        	/* num:               */
-	orientation : 1 			/* ascending/descending */
+	balanceEnabled : true,		
+	deleteMode : -1,        	
+	orientation : 1 			
 };
 
 var treeNode = function(parent,key,data){
@@ -28,6 +96,7 @@ var treeNode = function(parent,key,data){
 	this.height = 0;
 };
 
+/*
 var AVLTree = {
 	root : null
 };
@@ -39,7 +108,7 @@ AVLTree.preOrderTraversal = function(croot,shout,arguement){
 		AVLTree.preOrderTraversal(croot.left,shout);
 		AVLTree.preOrderTraversal(croot.right,shout);
 	}
-};
+};*/
 
 AVLTree.inOrderTraversal = function(croot,shout,arguement){
 	if(croot !== null){
