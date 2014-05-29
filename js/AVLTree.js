@@ -14,74 +14,360 @@
  */
 
 var AVLTree = (function(){
+	/* private classes */
 	var Settings = function(){
-		this.balanceEnabled = true;
+		this.balanceEnable = true;
 		this.deleteMode = -1;
 		this.orientation = 1;
 	};
-	
-	var TreeNode = function(key,data,parent){
+	var TreeNode = function(key,data){
 		this.key = key;
 		this.data = data;
 		this.left = null;
 		this.right = null;
-		this.parent = parent !== undefined ? parent : null;
 		this.height = 0;
 	};
 	
+	/* helper functions - node level */
+	/* require .call(this) */
+	
+	
+	/* not require .call(this) */
+	var getHeight = function(node){
+		if(node instanceof TreeNode){
+			return node.height;
+		}else if(node === null){
+			return -1;
+		}
+	};
+	
+	var getBalance = function(node){
+		if(node instanceof TreeNode){
+			return getHeight(node.right) - getHeight(node.left);
+		}
+	};
+	
+	var updateNodeHeight = function(node){
+		if(node instanceof TreeNode){
+			var leftHeight = getHeight(node.left);
+			var rightHeight = getHeight(node.right);
+			var myHeight = leftHeight > rightHeight ? leftHeight + 1: rightHeight + 1;
+			node.height = myHeight;
+		}
+	};
+	
+	
+	
+	/* public variables */
 	function _c(){
 		this.root = null;
 		this.settings = new Settings();
 	};
 		_c.root = null;
 		_c.settings = new Settings();
+		
+	/* public functions */
+	var _p = _c.prototype;
 	
-	_c.preOrderTraversal = _c.prototype.preOrderTraversal = function(shout,arguement,croot){
-		if(typeof shout === "function"){
-			croot = croot || this.root;
+	_c.preOrderTraversal = _p.preOrderTraversal = function(shout,arguement,croot){
+		croot = croot || this.root;
+		if(typeof shout === "function" && croot instanceof TreeNode){
 			shout(croot,arguement);
-			if(croot.left !== null){
+			if(croot.left instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.left);
 			}
-			if(croot.right !== null){
+			if(croot.right instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.right);
 			}
 		}
 	};
 	
-	_c.inOrderTraversal = _c.prototype.inOrderTraversal = function(shout,arguement,croot){
-		if(typeof shout === "function"){
-			croot = croot || this.root;
-			if(croot.left !== null){
+	_c.inOrderTraversal = _p.inOrderTraversal = function(shout,arguement,croot){
+		croot = croot || this.root;
+		if(typeof shout === "function" && croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.left);
 			}
 			shout(croot,arguement);
-			if(croot.right !== null){
+			if(croot.right instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.right);
 			}
 		}
 	};
 	
-	_c.postOrderTraversal = _c.prototype.postOrderTraversal = function(shout,arguement,croot){
-		if(typeof shout === "function"){
-			croot = croot || this.root;
-			if(croot.left !== null){
+	_c.postOrderTraversal = _p.postOrderTraversal = function(shout,arguement,croot){
+		croot = croot || this.root;
+		if(typeof shout === "function" && croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.left);
 			}
-			if(croot.right !== null){
+			if(croot.right instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.right);
 			}
 			shout(croot,arguement);
 		}
 	};
 	
+	_c.directionToGo = _p.directionToGo = function(node,key){
+		if(this.settings instanceof Settings){
+			if(this.settings.orientation > 0){
+				if(key > nodeKey){
+					return 1;
+				}else if(key < nodeKey){
+					return -1;
+				}else if(key === nodeKey){
+					return 0;
+				}
+			}else if(this.settings.orientation< 0){
+				if(key < nodeKey){
+					return 1;
+				}else if(key > nodeKey){
+					return -1;
+				}else if(key === nodeKey){
+					return 0;
+				}
+			}
+		}
+	};
+	
+	_c.insert = _p.insert = function(key,data,croot){
+		if(typeof key === "number" && typeof data === "object"){
+			croot = croot || this.root;
+			if(croot instanceof TreeNode){
+				var direction = this.directionToGo(croot,key);
+				if(direction > 0){
+					if(croot.right instanceof TreeNode){
+						return this.insert(key,data,croot.right);
+					}else if(croot.right === null){
+						croot.right = new TreeNode(key,data);
+						return croot.right;
+					}
+				}else if(direction < 0){
+					if(croot.left instanceof TreeNode){
+						return this.insert(key,data,croot.left);
+					}else if(croot.left === null){
+						croot.left = new TreeNode(key,data,croot);
+						return croot.left;
+					}
+				}else if(direction === 0){
+					return null;
+				}
+			}else if(croot === null){
+				this.root = new TreeNode(key,data);
+				return this.root;
+			}
+		}
+	};
+	
+	_c.detailsOf = _p.detailsOf = function(input,croot){
+		croot = croot || this.root;
+		var ReturnPack = function(exist,parent,node,side){
+			this.exist = exist;
+			this.parent = parent;
+			this.node = node;
+			this.side = side;
+		};
+		var returnNotFound = function(){
+			return new ReturnPack(false,null,null,NaN);
+		};
+		
+		if(croot instanceof TreeNode){
+			if(input instanceof TreeNode || typeof input === "number"){
+				var key = typeof input === "number" ? input : input.key;
+				var direction = this.directionToGo(croot,key);
+				if(direction > 0){
+					var right = croot.right;
+					if(right instanceof TreeNode){
+						if(right.key === key){
+							return new ReturnPack(true,croot,right,1);
+						}else{
+							return this.detailsOf(key,right);
+						}
+					}else if(right === null){
+						return returnNotFound();
+					}
+				}else if(direction < 0){
+					var left = croot.left;
+					if(left instanceof TreeNode){
+						if(left.key === key){
+							return new ReturnPack(true,croot,left,-1);
+						}else{
+							return this.detailsOf(key,left);
+						}
+					}else if(left === null){
+						return returnNotFound();
+					}
+				}else if(direction === 0){
+					return new ReturnPack(true,null,croot,0);
+				};
+			}else if(typeof input === "object"){
+				var data = input;
+				this._searchTemp = NaN;
+				var searchingFunction = function(node,data){
+					if(node instanceof TreeNode){
+						if(node.data === data){
+							this._searchTemp = node.key;
+						}
+					}
+				};
+				this.preOrderTraversal(searchingFunction,data);
+				var key = this._searchTemp;
+				this._searchTemp = undefined;
+				if(key !== NaN){
+					return this.detailsOf(key);
+				}else{
+					return returnNotFound();
+				}
+				
+			}
+		}else if(croot === null){
+			return returnNotFound();
+		}
+		
+	};
+	
+	_c.exist = _p.exist = function(input){
+		var detail = this.detailsOf(input);
+		var exist = detail.exist;
+		delete detail;
+		return exist;
+	};
+	
+	_c.find = _p.find = function(input){
+		var detail = this.detailsOf(input);
+		var node = detail.node;
+		delete detail;
+		return node;
+	};
+	
+	_c.getData = _p.getData = function(key){
+		if(typeof key === "number"){
+			var node = this.find(key);
+			if(node instanceof TreeNode){
+				return node.data;
+			}else if(node === null){
+				return null;
+			}
+		}
+	};
+	
+	_c.parentOf = _p.parentOf = function(input){
+		var detail = this.detailsOf(input);
+		var parent = detail.parent;
+		delete detail;
+		return parent;
+	};
+	
+	_c.directionFromParent = _p.sideFromParent = function(input){
+		var side = this.detailsOf(input);
+		var side = detail.side;
+		delete detail;
+		return side;
+	};
+	
+	_c.rotateLeft = _p.rotateLeft = function(croot){
+		if(croot instanceof TreeNode && croot.right instanceof TreeNode){
+			var parent = this.parentOf(croot);
+			var side = this.sideFromParent(croot);
+			var root = croot;
+			var right = croot.right;
+			var rightLeft = croot.right.left;
+			root.right = rightLeft;
+			right.left = root;
+			if(direction > 0){
+				parent.right = right;
+			}else if(direction < 0){
+				parent.left = right;
+			}else if(direction === 0){
+				this.root = right;
+			}
+			this.updateTreeHeight();
+		}
+	};
+
+	_c.rotateRight = _p.rotateRight = function(croot){
+		if(croot instanceof TreeNode && croot.left instanceof TreeNode){
+			var parent = this.parentOf(croot);
+			var side = this.sideFromParent(croot);
+			var root = croot;
+			var left = croot.left;
+			var leftRight = croot.left.right;
+			root.left = leftRight;
+			left.right = root;
+			if(direction > 0){
+				parent.right = left;
+			}else if(direction < 0){
+				parent.left = left;
+			}else if(direction === 0){
+				this.root = left;
+			}
+			this.updateTreeHeight();
+		}
+	};
+	
+	_c.balanceNode = _p.balanceNode = function(node){
+		if(this.settings instanceof Settings){
+			if(this.settings.balanceEnable){
+				var balance = getBalance(node);
+				if(balance >= 2){
+					var rightBalance = getBalance(node.right);
+					if(rightBalance < 0){
+						this.rotateRight(node.right);
+					}
+					this.rotateLeft(node);
+					this.balanceNode(node);
+				}else if(balance <=2){
+					var leftBalance = getBalance(node.left);
+					if(leftBalance > 0){
+						this.rotateLeft(node.left);
+					}
+					this.rotateRight(node);
+					this.balanceNode(node);
+				}
+			}
+		}
+	};
+	
+	_c.leftMost = _p.leftMost = function(croot){
+		croot = croot || this.root;
+		if(croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
+				return this.leftMost(croot.left);
+			}else if(croot.left === null){
+				return this;
+			}
+		}else if(croot === null){
+			return null;
+		}
+	};
+	
+	_c.rightMost = _p.rightMost = function(croot){
+		croot = croot || this.root;
+		if(croot instanceof TreeNode){
+			if(croot.right instanceof TreeNode){
+				return this.rightMost(croot.right);
+			}else if(croot.right === null){
+				return this;
+			}
+		}else if(croot === null){
+			return null;
+		}
+	};
+	
+	_c.updateTreeHeight = _p.updateTreeHeight = function(){
+		this.postOrderTraversal(updateNodeHeight);
+	};
+	
+	_c.balanceTree = _p.balanceTree = function(){
+		this.postOrderTraversal(this.balanceNode);
+	};
 	
 	
 	return _c;
 })();
 
 
-var AVLTreeSettings = {
+/*var AVLTreeSettings = {
 	balanceEnabled : true,		
 	deleteMode : -1,        	
 	orientation : 1 			
@@ -96,7 +382,7 @@ var treeNode = function(parent,key,data){
 	this.height = 0;
 };
 
-/*
+
 var AVLTree = {
 	root : null
 };
@@ -108,7 +394,7 @@ AVLTree.preOrderTraversal = function(croot,shout,arguement){
 		AVLTree.preOrderTraversal(croot.left,shout);
 		AVLTree.preOrderTraversal(croot.right,shout);
 	}
-};*/
+};
 
 AVLTree.inOrderTraversal = function(croot,shout,arguement){
 	if(croot !== null){
@@ -485,4 +771,4 @@ AVLTree.clear = function(croot){
 	delete croot.data;
 	delete croot;
 	
-};
+};*/
