@@ -110,10 +110,11 @@ AVLTreeDisplay.transform = function(width,height){
 
 AVLTreeDisplay.insert = function(key){
 	var data = new AVLTreeDisplay.data(key);
-	if(!AVLTree.insert(AVLTree.root,key,data)){
-		delete data;
+	var node = AVLTree.insert(key,data);
+	if(node !== null){
+		data.myNode = node;
 	}else{
-		data.myNode = AVLTree.find(key);
+		//data.destroy();
 	}
 };
 

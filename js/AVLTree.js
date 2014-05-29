@@ -109,7 +109,8 @@ var AVLTree = (function(){
 	};
 	
 	_c.directionToGo = _p.directionToGo = function(node,key){
-		if(this.settings instanceof Settings){
+		if(node instanceof TreeNode && this.settings instanceof Settings){
+			var nodeKey = node.key;
 			if(this.settings.orientation > 0){
 				if(key > nodeKey){
 					return 1;
@@ -274,11 +275,11 @@ var AVLTree = (function(){
 			var rightLeft = croot.right.left;
 			root.right = rightLeft;
 			right.left = root;
-			if(direction > 0){
+			if(side > 0){
 				parent.right = right;
-			}else if(direction < 0){
+			}else if(side < 0){
 				parent.left = right;
-			}else if(direction === 0){
+			}else if(side === 0){
 				this.root = right;
 			}
 			this.updateTreeHeight();
@@ -294,11 +295,11 @@ var AVLTree = (function(){
 			var leftRight = croot.left.right;
 			root.left = leftRight;
 			left.right = root;
-			if(direction > 0){
+			if(side > 0){
 				parent.right = left;
-			}else if(direction < 0){
+			}else if(side < 0){
 				parent.left = left;
-			}else if(direction === 0){
+			}else if(side === 0){
 				this.root = left;
 			}
 			this.updateTreeHeight();
