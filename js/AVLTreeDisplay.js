@@ -1,11 +1,23 @@
-/*
+/**
+ * AVLTreeDisplay.js
  * 
+ * Copyright (c) 2014 Patrick Huang. All rights reserved.
  * 
+ * Distributed under GNU General Public License v2. 
+ * http://www.gnu.org/licenses/gpl.html
  * 
+ * Part of this code requires "TweenMax", a JavaScript library 
+ * created and maintained by GreenSock Animation Platform (GSAP).
+ * Related codes have to be included before this file.
+ * Below is a dynamic link to the minified source code of TweenMax.
+ * http://cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenMax.min.js
+ * All codes in TweenMax.js is credited to GSAP working group.
+ * For details of their license, please look at 
+ * http://www.greensock.com/terms_of_use.html
  * 
+ * @file
  * 
- * 
- * 
+ * @author Patrick Huang <phuang17@illinois.edu>
  * 
  * 
  * 
