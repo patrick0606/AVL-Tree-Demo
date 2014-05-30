@@ -29,10 +29,7 @@ var AVLTree = (function(){
 	};
 	
 	/* helper functions - node level */
-	/* require .call(this) */
-	
-	
-	/* not require .call(this) */
+
 	var getHeight = function(node){
 		if(node instanceof TreeNode){
 			return node.height;
@@ -71,7 +68,7 @@ var AVLTree = (function(){
 	
 	_c.preOrderTraversal = _p.preOrderTraversal = function(shout,arguement,croot){
 		croot = croot || this.root;
-		if(typeof shout === "function" && croot instanceof TreeNode){
+		if(typeof shout === 'function' && croot instanceof TreeNode){
 			shout(croot,arguement);
 			if(croot.left instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.left);
@@ -84,7 +81,7 @@ var AVLTree = (function(){
 	
 	_c.inOrderTraversal = _p.inOrderTraversal = function(shout,arguement,croot){
 		croot = croot || this.root;
-		if(typeof shout === "function" && croot instanceof TreeNode){
+		if(typeof shout === 'function' && croot instanceof TreeNode){
 			if(croot.left instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.left);
 			}
@@ -97,7 +94,7 @@ var AVLTree = (function(){
 	
 	_c.postOrderTraversal = _p.postOrderTraversal = function(shout,arguement,croot){
 		croot = croot || this.root;
-		if(typeof shout === "function" && croot instanceof TreeNode){
+		if(typeof shout === 'function' && croot instanceof TreeNode){
 			if(croot.left instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.left);
 			}
@@ -132,7 +129,7 @@ var AVLTree = (function(){
 	};
 	
 	_c.insert = _p.insert = function(key,data,croot){
-		if(typeof key === "number" && typeof data === "object"){
+		if(typeof key === 'number' && typeof data === 'object'){
 			croot = croot || this.root;
 			if(croot instanceof TreeNode){
 				var direction = this.directionToGo(croot,key);
@@ -173,8 +170,8 @@ var AVLTree = (function(){
 		};
 		
 		if(croot instanceof TreeNode){
-			if(input instanceof TreeNode || typeof input === "number"){
-				var key = typeof input === "number" ? input : input.key;
+			if(input instanceof TreeNode || typeof input === 'number'){
+				var key = typeof input === 'number' ? input : input.key;
 				var direction = this.directionToGo(croot,key);
 				if(direction > 0){
 					var right = croot.right;
@@ -201,11 +198,11 @@ var AVLTree = (function(){
 				}else if(direction === 0){
 					return new ReturnPack(true,null,croot,0);
 				};
-			}else if(typeof input === "object"){
+			}else if(typeof input === 'object'){
 				var data = input;
-				this._searchTemp = NaN;
+				this._searchTemp = null;
 				var searchingFunction = function(node,data){
-					if(node instanceof TreeNode){
+					if(this._searchTemp === null && node instanceof TreeNode){
 						if(node.data === data){
 							this._searchTemp = node.key;
 						}
@@ -214,7 +211,7 @@ var AVLTree = (function(){
 				this.preOrderTraversal(searchingFunction,data);
 				var key = this._searchTemp;
 				this._searchTemp = undefined;
-				if(key !== NaN){
+				if(typeof key == 'number'){
 					return this.detailsOf(key);
 				}else{
 					return returnNotFound();
@@ -242,7 +239,7 @@ var AVLTree = (function(){
 	};
 	
 	_c.getData = _p.getData = function(key){
-		if(typeof key === "number"){
+		if(typeof key === 'number'){
 			var node = this.find(key);
 			if(node instanceof TreeNode){
 				return node.data;
@@ -316,14 +313,14 @@ var AVLTree = (function(){
 						this.rotateRight(node.right);
 					}
 					this.rotateLeft(node);
-					this.balanceNode(node);
+					//this.balanceNode(node);
 				}else if(balance <=2){
 					var leftBalance = getBalance(node.left);
 					if(leftBalance > 0){
 						this.rotateLeft(node.left);
 					}
 					this.rotateRight(node);
-					this.balanceNode(node);
+					//this.balanceNode(node);
 				}
 			}
 		}
@@ -352,6 +349,21 @@ var AVLTree = (function(){
 			}
 		}else if(croot === null){
 			return null;
+		}
+	};
+	
+	_c.switchChild = _p.switchChild = function(croot){
+		croot = croot || this.root;
+		if(croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
+				this.switchChild(croot.left);
+			}
+			if(croot.right instanceof TreeNode){
+				this.switchChild(croot.right);
+			}
+			var temp = croot.left;
+			croot.left = croot.right;
+			croot.right = temp;
 		}
 	};
 	
