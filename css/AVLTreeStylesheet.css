@@ -15,7 +15,7 @@ h1 {
 	text-align: center;
 }
 
-#mainBoard {
+#AVLTreeDemoContainer {
 	position: relative;
 	border: 1px solid black;
 	height: 400px;

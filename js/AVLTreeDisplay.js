@@ -6,9 +6,9 @@
  * Distributed under GNU General Public License v2. 
  * http://www.gnu.org/licenses/gpl.html
  * 
- * Part of this code requires "TweenMax", a JavaScript library 
- * created and maintained by GreenSock Animation Platform (GSAP).
- * Related codes have to be included before this file.
+ * Part of this code requires "TweenMax", which is created and maintained by 
+ * GreenSock Animation Platform (GSAP).
+ * 
  * Below is a dynamic link to the minified source code of TweenMax.
  * http://cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenMax.min.js
  * All codes in TweenMax.js is credited to GSAP working group.
@@ -38,7 +38,7 @@ var AVLTreeDisplay = {
 	showBalance : false,
 	showHeight : false,
 	showNull : false,
-	shape : "classic",
+	shape : 'classic',
 	stepByStep : false,
 	bounceOnStep : false,
 	animatedRedo : false,
@@ -66,7 +66,7 @@ AVLTreeDisplay.divInit = function(key){
 	TweenLite.set(myDiv,{top:-10-AVLTreeDisplay.nodeSize.diameter});
 	TweenLite.set(myDiv,{left:AVLTreeDisplay.mainBoardWidth / 2 - AVLTreeDisplay.nodeSize.diameter / 2});
 	myDiv.innerHTML = key;
-	document.getElementById("mainBoard").appendChild(myDiv);
+	document.getElementById("AVLTreeDemoContainer").appendChild(myDiv);
 	return myDiv;
 };
 
@@ -74,7 +74,7 @@ AVLTreeDisplay.line = function(){
 	var line = document.createElement("div");
 	line.setAttribute("class","line");
 	TweenLite.set(line,{transformOrigin:"left top 0",zIndex: -1,top: -100});
-	document.getElementById("mainBoard").appendChild(line);
+	document.getElementById("AVLTreeDemoContainer").appendChild(line);
 	return line;
 };
 
@@ -82,7 +82,7 @@ AVLTreeDisplay.renderLeft = function(croot){
 	var line = croot.data.leftLine;
 	if(croot.left !== null){
 		line.style.visibility = "visible";
-		var mainBoardRect = document.getElementById("mainBoard").getBoundingClientRect();
+		var mainBoardRect = document.getElementById("AVLTreeDemoContainer").getBoundingClientRect();
 		var hostRect = croot.data.myDiv.getBoundingClientRect();
 		var childRect = croot.left.data.myDiv.getBoundingClientRect();
 		var x = hostRect.left + AVLTreeDisplay.nodeSize.diameter / 2;
@@ -100,7 +100,7 @@ AVLTreeDisplay.renderRight = function(croot){
 	var line = croot.data.rightLine;
 	if(croot.right !== null){
 		line.style.visibility = "visible";
-		var mainBoardRect = document.getElementById("mainBoard").getBoundingClientRect();
+		var mainBoardRect = document.getElementById("AVLTreeDemoContainer").getBoundingClientRect();
 		var hostRect = croot.data.myDiv.getBoundingClientRect();
 		var childRect = croot.right.data.myDiv.getBoundingClientRect();
 		var x = hostRect.left + AVLTreeDisplay.nodeSize.diameter / 2;
