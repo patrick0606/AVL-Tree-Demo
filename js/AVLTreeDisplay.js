@@ -24,39 +24,100 @@
  */
  
 var AVLTreeDisplay = {
-	nodeSize : {
-		width : 60,
-		nullWidth : 20,
-		diameter : 40,
+	size: {
+		nodeDiameter: 40,
+		nodeWidth: 60,
+		nullNodeWidth: 20,
+		lineWidth: 2,
+		marginX: 10,
+		marginY: 70,
+		containerWidth: 800
 	},
-	margin : {
-		x : 10,
-		y : 70,
+	settings: {
+		animationSpeed: 1,
+		bounceHeight: 40,
+		showBalance: false,
+		showHeight: false,
+		showNull: false,
+		shape: 'classic',
+		stepByStep: false,
+		bounceOnStep: false,
+		animatedRedo: false,
+		mute : true
 	},
-	animationSpeed : 1,
-	bounceHeight : 1,
-	showBalance : false,
-	showHeight : false,
-	showNull : false,
-	shape : 'classic',
-	stepByStep : false,
-	bounceOnStep : false,
-	animatedRedo : false,
-	mute : true,
-	mainBoardWidth: 800
+	
+	data: function(key){
+		this.width = 0;
+		this.positionX = 0;
+		this.positionY = 0;
+		this.myDiv = AVLTreeDisplay.divInit(key);
+		this.myDiv.host = this;
+		this.leftLine = this.createLine();
+		this.leftLine.host = this;
+		this.rightLine = this.createLine();
+		this.rightLine.host = this;
+		this.myNode = null;
+	},
+	
+	createLine: function(){
+		var line = new SimpleLine(0,0,0,0,this.size.lineWidth,'line');
+		return line;
+	},
+	
+	createNode: function(key,x,y){
+		var div = document.createElement('div');
+		x = x || this.size.containerWidth / 2 - this.size.nodeDiameter / 2;
+		y = y || 0 - this.size.nodeDiameter;
+		TweenMax.set(div,{
+			left: x,
+			top: y,
+			className: 'node',
+			innerHTML: key
+		});
+		return div;
+	},
+	
+	calculateWidth: function(node){
+		node = node || AVLTree.root;
+		if(node !== null){
+			var width = this.size.marginX;
+			if(croot.left === null){
+				width += this.size.nullNodeWidth;
+			}else{
+				width += this.calculateWidth(node.left);
+			}
+			if(croot.right === null){
+				width += this.size.nullNodeWidth;
+			}else{
+				width += this.calculateWidth(node.right);
+			}
+			node.data.width = width;
+			return width;
+		}
+	},
+	
+	calculatePosition: function(node){
+		
+	},
+	
+	rootLine: null,
+	
+	init: function(){
+		this.rootLine = new SimpleLine( this.size.containerWidth / 2, 
+										0 - this.size.marginY,
+										this.size.containerWidth / 2, 
+										this.size.marginY,
+							 			this.size.lineWidth, 'line'
+									  );
+		$(this.rootLine.div).addClass('rootLine');
+		$('#AVLTreeDemoContainer').append(this.rootLine.div);
+	}
+	
 };
 
-AVLTreeDisplay.data = function(key){
-	this.width = 0;
-	this.positionX = AVLTreeDisplay.mainBoardWidth / 2;
-	this.positionY = -100;
-	this.myDiv = AVLTreeDisplay.divInit(key);
-	this.myDiv.host = this;
-	this.leftLine = AVLTreeDisplay.line();
-	this.leftLine.host = this;
-	this.rightLine = AVLTreeDisplay.line();
-	this.rightLine.host = this;
-	this.myNode = null;
+var AVLTreeAnimation = {
+	globalTimeline: new TimelineMax(),
+	
 };
 
 AVLTreeDisplay.divInit = function(key){
@@ -114,11 +175,7 @@ AVLTreeDisplay.renderRight = function(croot){
 	}
 };
 
-AVLTreeDisplay.transform = function(width,height){
-	var length = Math.sqrt(width*width+height*height);
-	var angle = Math.atan2(height,width)*180/Math.PI;
-	return {length:length,angle:angle};
-};
+
 
 AVLTreeDisplay.insert = function(key){
 	var data = new AVLTreeDisplay.data(key);

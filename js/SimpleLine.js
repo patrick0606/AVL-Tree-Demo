@@ -23,7 +23,7 @@ var SimpleLine = (function(){
 	var transform = function(width,height){
 		var length = Math.sqrt(width*width+height*height);
 		var angle = Math.atan2(height,width)*180/Math.PI;
-		return {length:length,angle:angle};
+		return {length: length, angle: angle};
 	};
 	
 	/* methods */
@@ -35,7 +35,7 @@ var SimpleLine = (function(){
 		endX = endX || 0;
 		endY = endY || 0;
 		lineWidth = lineWidth || 1;
-		TweenLite.set(div,{
+		TweenMax.set(div,{
 			left: startX,
 			top: startY,
 			width: polarForm.length,
@@ -44,12 +44,12 @@ var SimpleLine = (function(){
 			rotation: polarForm.angle,
 		});
 		if(className){
-			TweenLite.set(div,{
+			TweenMax.set(div,{
 				className: className
 			});
 		}
 		if(id){
-			TweenLite.set(div,{
+			TweenMax.set(div,{
 				id: id
 			});
 		}
@@ -57,7 +57,7 @@ var SimpleLine = (function(){
 	};
 	_p.setTo = function(startX,startY,endX,endY){
 		var polarForm = transform(endX - startX, endY - startY);
-		TweenLite.set(div,{
+		TweenMax.set(div,{
 			left: startX,
 			top: startY,
 			width: polarForm.length,
@@ -65,7 +65,7 @@ var SimpleLine = (function(){
 		});
 	};
 	_p.setLineWidth = function(lineWidth){
-		TweenLite.set(div,{
+		TweenMax.set(div,{
 			height: lineWidth
 		});
 	};
