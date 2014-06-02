@@ -11,7 +11,7 @@
  * 
  */
 
-var AVLTreeControl = {
+window.AVLTreeControl = {
 	
 };
 

@@ -13,7 +13,8 @@
  * 
  */
 
-var AVLTree = (function(){
+window.AVLTree = window.AVLTree || (function(){
+	
 	/* private classes */
 	var Settings = function(){
 		this.balanceEnable = true;
@@ -66,10 +67,10 @@ var AVLTree = (function(){
 	/* public functions */
 	var _p = _c.prototype;
 	
-	_c.preOrderTraversal = _p.preOrderTraversal = function(shout,arguement,croot){
+	_c.preOrderTraversal = _p.preOrderTraversal = function(shout,argument,croot){
 		croot = croot || this.root;
 		if(typeof shout === 'function' && croot instanceof TreeNode){
-			shout(croot,arguement);
+			shout(croot,argument);
 			if(croot.left instanceof TreeNode){
 				_c.preOrderTraversal(shout,argument,croot.left);
 			}
@@ -79,29 +80,29 @@ var AVLTree = (function(){
 		}
 	};
 	
-	_c.inOrderTraversal = _p.inOrderTraversal = function(shout,arguement,croot){
+	_c.inOrderTraversal = _p.inOrderTraversal = function(shout,argument,croot){
 		croot = croot || this.root;
 		if(typeof shout === 'function' && croot instanceof TreeNode){
 			if(croot.left instanceof TreeNode){
-				_c.preOrderTraversal(shout,argument,croot.left);
+				_c.inOrderTraversal(shout,argument,croot.left);
 			}
-			shout(croot,arguement);
+			shout(croot,argument);
 			if(croot.right instanceof TreeNode){
-				_c.preOrderTraversal(shout,argument,croot.right);
+				_c.inOrderTraversal(shout,argument,croot.right);
 			}
 		}
 	};
 	
-	_c.postOrderTraversal = _p.postOrderTraversal = function(shout,arguement,croot){
+	_c.postOrderTraversal = _p.postOrderTraversal = function(shout,argument,croot){
 		croot = croot || this.root;
 		if(typeof shout === 'function' && croot instanceof TreeNode){
 			if(croot.left instanceof TreeNode){
-				_c.preOrderTraversal(shout,argument,croot.left);
+				_c.postOrderTraversal(shout,argument,croot.left);
 			}
 			if(croot.right instanceof TreeNode){
-				_c.preOrderTraversal(shout,argument,croot.right);
+				_c.postOrderTraversal(shout,argument,croot.right);
 			}
-			shout(croot,arguement);
+			shout(croot,argument);
 		}
 	};
 	

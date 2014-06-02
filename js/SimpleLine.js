@@ -13,9 +13,22 @@
  *  
  */
 
-var SimpleLine = (function(){
+window.SimpleLine = window.SimpleLine || (function(){
+	
 	var _c = function(startX,startY,endX,endY,lineWidth,className,id){
-		this.div = this.init(startX,startY,endX,endY,lineWidth,className,id);
+		this.startX = startX || 0;
+		this.startY = startY || 0;
+		this.endX = endX || 0;
+		this.endY = endY || 0;
+		lineWidth = lineWidth || 1;
+		this.div = this.init(this.startX,
+							 this.startY,
+							 this.endX,
+							 this.endY,
+							 lineWidth,
+							 className,
+							 id
+							);
 	};
 	var _p = _c.prototype;
 	
@@ -30,11 +43,7 @@ var SimpleLine = (function(){
 	_p.init = function(startX,startY,endX,endY,lineWidth,className,id){
 		var div = document.createElement("div");
 		var polarForm = transform(endX - startX, endY - startY);
-		startX = startX || 0;
-		startY = startY || 0;
-		endX = endX || 0;
-		endY = endY || 0;
-		lineWidth = lineWidth || 1;
+
 		TweenMax.set(div,{
 			left: startX,
 			top: startY,
@@ -56,8 +65,12 @@ var SimpleLine = (function(){
 		return div;
 	};
 	_p.setTo = function(startX,startY,endX,endY){
+		this.startX = (startX = startX || this.startX);
+		this.startY = (startY = startY || this.startY);
+		this.endX = (endX = endX || this.endX);
+		this.endY = (endY = endY || this.endY);
 		var polarForm = transform(endX - startX, endY - startY);
-		TweenMax.set(div,{
+		TweenMax.set(this.div,{
 			left: startX,
 			top: startY,
 			width: polarForm.length,
@@ -65,11 +78,16 @@ var SimpleLine = (function(){
 		});
 	};
 	_p.setLineWidth = function(lineWidth){
-		TweenMax.set(div,{
+		TweenMax.set(this.div,{
 			height: lineWidth
 		});
 	};
-	
+	_p.hide = function(){
+		$(this.div).addClass('hidden');
+	};
+	_p.show = function(){
+		$(this.div).removeClass('hidden');
+	};
 	return _c;
 })();
 

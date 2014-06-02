@@ -23,7 +23,7 @@
  * 
  */
  
-var AVLTreeDisplay = {
+window.AVLTreeDisplay = {
 	size: {
 		nodeDiameter: 40,
 		nodeWidth: 60,
@@ -46,17 +46,19 @@ var AVLTreeDisplay = {
 		mute : true
 	},
 	
+	tree: AVLTree,
+	
 	data: function(key){
 		this.width = 0;
 		this.positionX = 0;
 		this.positionY = 0;
-		this.myDiv = AVLTreeDisplay.divInit(key);
-		this.myDiv.host = this;
-		this.leftLine = this.createLine();
+		this.div = AVLTreeDisplay.createNode(key);
+		this.div.host = this;
+		this.leftLine = AVLTreeDisplay.createLine();
 		this.leftLine.host = this;
-		this.rightLine = this.createLine();
+		this.rightLine = AVLTreeDisplay.createLine();
 		this.rightLine.host = this;
-		this.myNode = null;
+		this.node = null;
 	},
 	
 	createLine: function(){
@@ -72,21 +74,21 @@ var AVLTreeDisplay = {
 			left: x,
 			top: y,
 			className: 'node',
-			innerHTML: key
 		});
+		div.innerHTML = key;
 		return div;
 	},
 	
 	calculateWidth: function(node){
-		node = node || AVLTree.root;
+		node = node || this.tree.root;
 		if(node !== null){
 			var width = this.size.marginX;
-			if(croot.left === null){
+			if(node.left === null){
 				width += this.size.nullNodeWidth;
 			}else{
 				width += this.calculateWidth(node.left);
 			}
-			if(croot.right === null){
+			if(node.right === null){
 				width += this.size.nullNodeWidth;
 			}else{
 				width += this.calculateWidth(node.right);
@@ -97,18 +99,88 @@ var AVLTreeDisplay = {
 	},
 	
 	calculatePosition: function(node){
-		
+		if(this.tree.root !== null){
+			if(!node){
+				this.calculateWidth();
+				this.tree.root.data.positionX = this.size.containerWidth / 2 
+											  - this.size.nodeDiameter / 2;
+				this.tree.root.data.positionY = this.size.marginY;
+			}
+			node = node || this.tree.root;
+			if(node.left !== null){
+				node.left.data.positionX = node.data.positionX 
+										 - node.data.width / 2 
+										 + node.left.data.width / 2;
+				node.left.data.positionY = node.data.positionY 
+										 + this.size.marginY;
+				this.calculatePosition(node.left);
+			}
+			if(node.right !== null){
+				node.right.data.positionX = node.data.positionX 
+										  + node.data.width / 2 
+										  - node.right.data.width / 2;
+				node.right.data.positionY = node.data.positionY
+										  + this.size.marginY;
+				this.calculatePosition(node.right);
+			}
+		}
 	},
 	
 	rootLine: null,
 	
+	renderLine: function(node){
+		if(this.tree.root === null){
+			this.rootLine.setTo(this.size.containerWidth / 2, 
+								this.size.marginY
+							   );
+		}else{
+			var container = document.getElementById('AVLTreeDemoContainer');
+			var containerRect = container.getBoundingClientRect();
+			var scrollLeft = container.scrollLeft;
+			var scrollTop = container.scrollTop;
+			var offsetLeft = this.size.nodeDiameter / 2 - containerRect.left + scrollLeft;
+			var offsetTop = this.size.nodeDiameter / 2 - containerRect.top + scrollTop;
+			if(!node){
+				var rootRect = this.tree.root.data.div.getBoundingClientRect();
+				var rootLeft = rootRect.left + offsetLeft;
+				var rootTop = rootRect.top + offsetTop;
+				this.rootLine.setTo(rootLeft,rootTop);
+			}
+			node = node || this.tree.root;
+			var nodeRect = node.data.div.getBoundingClientRect();
+			var nodeLeft = nodeRect.left + offsetLeft;
+			var nodeTop = nodeRect.top + offsetTop;
+
+			if(node.left !== null){
+				var leftRect = node.left.data.div.getBoundingClientRect();
+				var leftLeft = leftRect.left + offsetLeft;
+				var leftTop = leftRect.top + offsetTop;
+				node.data.leftLine.show();
+				node.data.leftLine.setTo(nodeLeft,nodeTop,leftLeft,leftTop);
+				this.renderLine(node.left);
+			}else{
+				node.data.leftLine.hide();
+			}
+			if(node.right !== null){
+				var rightRect = node.right.data.div.getBoundingClientRect();
+				var rightLeft = rightRect.left + offsetLeft;
+				var rightTop = rightRect.top + offsetTop;
+				node.data.rightLine.show();
+				node.data.rightLine.setTo(nodeLeft,nodeTop,rightLeft,rightTop);
+				this.renderLine(node.right);
+			}else{
+				node.data.rightLine.hide();
+			}
+		}
+	},
+	
 	init: function(){
-		this.rootLine = new SimpleLine( this.size.containerWidth / 2, 
-										0 - this.size.marginY,
-										this.size.containerWidth / 2, 
-										this.size.marginY,
-							 			this.size.lineWidth, 'line'
-									  );
+		this.rootLine = this.createLine();
+		this.rootLine.setTo(this.size.containerWidth / 2, 
+							this.size.marginY,
+							this.size.containerWidth / 2, 
+							0 - this.size.marginY
+						   );
 		$(this.rootLine.div).addClass('rootLine');
 		$('#AVLTreeDemoContainer').append(this.rootLine.div);
 	}
@@ -116,29 +188,12 @@ var AVLTreeDisplay = {
 };
 
 var AVLTreeAnimation = {
-	globalTimeline: new TimelineMax(),
+	globalTimeline: new TimelineMax()
 	
 };
 
-AVLTreeDisplay.divInit = function(key){
-	var myDiv = document.createElement("div");
-	myDiv.setAttribute("class","treeNode");
-	myDiv.style.lineHeight = AVLTreeDisplay.nodeSize.diameter + "px";
-	TweenLite.set(myDiv,{top:-10-AVLTreeDisplay.nodeSize.diameter});
-	TweenLite.set(myDiv,{left:AVLTreeDisplay.mainBoardWidth / 2 - AVLTreeDisplay.nodeSize.diameter / 2});
-	myDiv.innerHTML = key;
-	document.getElementById("AVLTreeDemoContainer").appendChild(myDiv);
-	return myDiv;
-};
 
-AVLTreeDisplay.line = function(){
-	var line = document.createElement("div");
-	line.setAttribute("class","line");
-	TweenLite.set(line,{transformOrigin:"left top 0",zIndex: -1,top: -100});
-	document.getElementById("AVLTreeDemoContainer").appendChild(line);
-	return line;
-};
-
+/*
 AVLTreeDisplay.renderLeft = function(croot){
 	var line = croot.data.leftLine;
 	if(croot.left !== null){
@@ -173,7 +228,7 @@ AVLTreeDisplay.renderRight = function(croot){
 	}else{
 		line.style.visibility = "hidden";
 	}
-};
+};*/
 
 
 
@@ -182,6 +237,7 @@ AVLTreeDisplay.insert = function(key){
 	var node = AVLTree.insert(key,data);
 	if(node !== null){
 		data.myNode = node;
+		$('#AVLTreeDemoContainer').append([data.div,data.leftLine.div,data.rightLine.div]);
 	}else{
 		//data.destroy();
 	}
@@ -197,6 +253,7 @@ AVLTreeDisplay.remove = function(key){
 	}
 };
 
+/*
 AVLTreeDisplay.calculateWidth = function(croot){
 	var width = AVLTreeDisplay.margin.x;
 	if(croot.left === null){
@@ -232,23 +289,27 @@ AVLTreeDisplay.calculatePosition = function(croot){
 		}
 	}
 };
+*/
 
 AVLTreeDisplay.renderNode = function(croot){
-	TweenLite.to(croot.data.myDiv,0.5,
+	TweenLite.to(croot.data.div,0.5,
 		{
-			top: croot.data.positionY, 
 			left: croot.data.positionX,
+			top: croot.data.positionY, 
 			onUpdate: AVLTreeDisplay.renderLine,
-			onUpdateParams: [croot]
+			onUpdateScope: AVLTreeDisplay
 		});
 };
 
+/*
 AVLTreeDisplay.renderLine = function(croot){
 	AVLTreeDisplay.renderLeft(croot);
 	AVLTreeDisplay.renderRight(croot);
 };
 
+*/
 AVLTreeDisplay.renderTree = function(){
-	AVLTreeDisplay.calculatePosition(AVLTree.root);
-	AVLTree.inOrderTraversal(AVLTree.root,AVLTreeDisplay.renderNode);
+	
+	this.calculatePosition();
+	this.tree.inOrderTraversal(this.renderNode);
 };
