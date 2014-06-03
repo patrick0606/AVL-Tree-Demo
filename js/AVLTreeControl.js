@@ -28,6 +28,7 @@ AVLTreeControl.insert = function(){
 	var key = parseInt(document.getElementById("input").value);
 	AVLTreeDisplay.insert(key);
 	AVLTreeDisplay.renderTree();
+	AVLTreeAnimation.globalTimeline.restart();
 };
 
 AVLTreeControl.remove = function(){

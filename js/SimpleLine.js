@@ -20,15 +20,9 @@ window.SimpleLine = window.SimpleLine || (function(){
 		this.startY = startY || 0;
 		this.endX = endX || 0;
 		this.endY = endY || 0;
-		lineWidth = lineWidth || 1;
-		this.div = this.init(this.startX,
-							 this.startY,
-							 this.endX,
-							 this.endY,
-							 lineWidth,
-							 className,
-							 id
-							);
+		this.lineWidth = lineWidth || 1;
+		this.div = null;
+		this.init(className,id);
 	};
 	var _p = _c.prototype;
 	
@@ -39,48 +33,45 @@ window.SimpleLine = window.SimpleLine || (function(){
 		return {length: length, angle: angle};
 	};
 	
+	
 	/* methods */
-	_p.init = function(startX,startY,endX,endY,lineWidth,className,id){
-		var div = document.createElement("div");
-		var polarForm = transform(endX - startX, endY - startY);
-
-		TweenMax.set(div,{
-			left: startX,
-			top: startY,
+	_p.renderLine = function(){
+		var polarForm = transform(this.endX - this.startX, this.endY - this.startY);
+		TweenMax.set(this.div,{
+			left: this.startX,
+			top: this.startY - this.lineWidth / 2,
+			height: this.lineWidth,
 			width: polarForm.length,
-			height: lineWidth,
-			transformOrigin: 'left 50%',
 			rotation: polarForm.angle,
 		});
+	};
+	_p.init = function(className,id){
+		this.div = document.createElement("div");
+		TweenMax.set(this.div,{
+			transformOrigin: 'left 50%',
+		});
 		if(className){
-			TweenMax.set(div,{
+			TweenMax.set(this.div,{
 				className: className
 			});
 		}
 		if(id){
-			TweenMax.set(div,{
+			TweenMax.set(this.div,{
 				id: id
 			});
 		}
-		return div;
+		this.renderLine();
 	};
 	_p.setTo = function(startX,startY,endX,endY){
-		this.startX = (startX = startX || this.startX);
-		this.startY = (startY = startY || this.startY);
-		this.endX = (endX = endX || this.endX);
-		this.endY = (endY = endY || this.endY);
-		var polarForm = transform(endX - startX, endY - startY);
-		TweenMax.set(this.div,{
-			left: startX,
-			top: startY,
-			width: polarForm.length,
-			rotation: polarForm.angle,
-		});
+		this.startX = startX || this.startX;
+		this.startY = startY || this.startY;
+		this.endX = endX || this.endX;
+		this.endY = endY || this.endY;
+		this.renderLine();
 	};
 	_p.setLineWidth = function(lineWidth){
-		TweenMax.set(this.div,{
-			height: lineWidth
-		});
+		this.lineWidth = lineWidth || this.lineWidth;
+		this.renderLine();
 	};
 	_p.hide = function(){
 		$(this.div).addClass('hidden');

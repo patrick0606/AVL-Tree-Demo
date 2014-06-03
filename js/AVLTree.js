@@ -130,32 +130,36 @@ window.AVLTree = window.AVLTree || (function(){
 	};
 	
 	_c.insert = _p.insert = function(key,data,croot){
+		var returningNode = null;
 		if(typeof key === 'number' && typeof data === 'object'){
 			croot = croot || this.root;
 			if(croot instanceof TreeNode){
 				var direction = this.directionToGo(croot,key);
 				if(direction > 0){
 					if(croot.right instanceof TreeNode){
-						return this.insert(key,data,croot.right);
+						returningNode = this.insert(key,data,croot.right);
 					}else if(croot.right === null){
 						croot.right = new TreeNode(key,data);
-						return croot.right;
+						returningNode = croot.right;
 					}
 				}else if(direction < 0){
 					if(croot.left instanceof TreeNode){
-						return this.insert(key,data,croot.left);
+						returningNode = this.insert(key,data,croot.left);
 					}else if(croot.left === null){
 						croot.left = new TreeNode(key,data,croot);
-						return croot.left;
+						returningNode = croot.left;
 					}
 				}else if(direction === 0){
-					return null;
+					returningNode = null;
 				}
-			}else if(croot === null){
+				this.balanceNode(croot);
+			}else if(this.root === null){
 				this.root = new TreeNode(key,data);
-				return this.root;
+				returningNode = this.root;
 			}
+			return returningNode;
 		}
+		
 	};
 	
 	_c.detailsOf = _p.detailsOf = function(input,croot){
@@ -257,8 +261,8 @@ window.AVLTree = window.AVLTree || (function(){
 		return parent;
 	};
 	
-	_c.directionFromParent = _p.sideFromParent = function(input){
-		var side = this.detailsOf(input);
+	_c.sideFromParent = _p.sideFromParent = function(input){
+		var detail = this.detailsOf(input);
 		var side = detail.side;
 		delete detail;
 		return side;
@@ -305,6 +309,7 @@ window.AVLTree = window.AVLTree || (function(){
 	};
 	
 	_c.balanceNode = _p.balanceNode = function(node){
+		updateNodeHeight(node);
 		if(this.settings instanceof Settings){
 			if(this.settings.balanceEnable){
 				var balance = getBalance(node);
@@ -315,7 +320,7 @@ window.AVLTree = window.AVLTree || (function(){
 					}
 					this.rotateLeft(node);
 					//this.balanceNode(node);
-				}else if(balance <=2){
+				}else if(balance <= -2){
 					var leftBalance = getBalance(node.left);
 					if(leftBalance > 0){
 						this.rotateLeft(node.left);

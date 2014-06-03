@@ -129,6 +129,7 @@ window.AVLTreeDisplay = {
 	rootLine: null,
 	
 	renderLine: function(node){
+		console.log('update');
 		if(this.tree.root === null){
 			this.rootLine.setTo(this.size.containerWidth / 2, 
 								this.size.marginY
@@ -178,7 +179,7 @@ window.AVLTreeDisplay = {
 		this.rootLine = this.createLine();
 		this.rootLine.setTo(this.size.containerWidth / 2, 
 							this.size.marginY,
-							this.size.containerWidth / 2, 
+							this.size.containerWidth / 2 + 1, 
 							0 - this.size.marginY
 						   );
 		$(this.rootLine.div).addClass('rootLine');
@@ -188,8 +189,14 @@ window.AVLTreeDisplay = {
 };
 
 var AVLTreeAnimation = {
-	globalTimeline: new TimelineMax()
-	
+	globalTimeline: new TimelineMax({
+		onUpdate: AVLTreeDisplay.renderLine,
+		onUpdateScope: AVLTreeDisplay
+
+		}),
+	init: function(){
+		
+	}
 };
 
 
@@ -292,13 +299,12 @@ AVLTreeDisplay.calculatePosition = function(croot){
 */
 
 AVLTreeDisplay.renderNode = function(croot){
-	TweenLite.to(croot.data.div,0.5,
+	AVLTreeAnimation.globalTimeline.to(croot.data.div,0.5,
 		{
 			left: croot.data.positionX,
-			top: croot.data.positionY, 
-			onUpdate: AVLTreeDisplay.renderLine,
-			onUpdateScope: AVLTreeDisplay
-		});
+			top: croot.data.positionY,
+			ease: Back.easeOut
+		},0);
 };
 
 /*
@@ -309,7 +315,6 @@ AVLTreeDisplay.renderLine = function(croot){
 
 */
 AVLTreeDisplay.renderTree = function(){
-	
 	this.calculatePosition();
 	this.tree.inOrderTraversal(this.renderNode);
 };
