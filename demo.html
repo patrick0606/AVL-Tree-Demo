@@ -10,12 +10,772 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenMax.min.js"></script>
 		<script src="js/SimpleLine.js"></script>
-		<script src="js/AVLTree.js"></script>
-		<script src="js/AVLTreeDisplay.js"></script>
-		<script src="js/AVLTreeControl.js"></script>
 		<script>
-			
-		</script>
+	window.SimpleLine = window.SimpleLine || (function(){
+	
+	var _c = function(startX,startY,endX,endY,lineWidth,className,id){
+		this.startX = startX || 0;
+		this.startY = startY || 0;
+		this.endX = endX || 0;
+		this.endY = endY || 0;
+		this.lineWidth = lineWidth || 1;
+		this.div = null;
+		this.init(className,id);
+	};
+	var _p = _c.prototype;
+	
+	/* helper functions */
+	var transform = function(width,height){
+		var length = Math.sqrt(width*width+height*height);
+		var angle = Math.atan2(height,width)*180/Math.PI;
+		return {length: length, angle: angle};
+	};
+	
+	
+	/* methods */
+	_p.renderLine = function(){
+		var polarForm = transform(this.endX - this.startX, this.endY - this.startY);
+		TweenMax.set(this.div,{
+			left: this.startX,
+			top: this.startY - this.lineWidth / 2,
+			height: this.lineWidth,
+			width: polarForm.length,
+			rotation: polarForm.angle,
+		});
+	};
+	_p.init = function(className,id){
+		this.div = document.createElement("div");
+		TweenMax.set(this.div,{
+			transformOrigin: 'left 50%',
+		});
+		if(className){
+			TweenMax.set(this.div,{
+				className: className
+			});
+		}
+		if(id){
+			TweenMax.set(this.div,{
+				id: id
+			});
+		}
+		this.renderLine();
+	};
+	_p.setTo = function(startX,startY,endX,endY){
+		this.startX = startX || this.startX;
+		this.startY = startY || this.startY;
+		this.endX = endX || this.endX;
+		this.endY = endY || this.endY;
+		this.renderLine();
+	};
+	_p.setLineWidth = function(lineWidth){
+		this.lineWidth = lineWidth || this.lineWidth;
+		this.renderLine();
+	};
+	_p.hide = function(){
+		$(this.div).addClass('hidden');
+	};
+	_p.show = function(){
+		$(this.div).removeClass('hidden');
+	};
+	return _c;
+})();	
+		
+	window.AVLTree = window.AVLTree || (function(){
+	
+	/* private classes */
+	var Settings = function(){
+		this.balanceEnable = true;
+		this.deleteMode = -1;
+		this.orientation = 1;
+	};
+	var TreeNode = function(key,data){
+		this.key = key;
+		this.data = data;
+		this.left = null;
+		this.right = null;
+		this.height = 0;
+	};
+	
+	/* helper functions - node level */
+
+	var getHeight = function(node){
+		if(node instanceof TreeNode){
+			return node.height;
+		}else if(node === null){
+			return -1;
+		}
+	};
+	
+	var getBalance = function(node){
+		if(node instanceof TreeNode){
+			return getHeight(node.right) - getHeight(node.left);
+		}
+	};
+	
+	var updateNodeHeight = function(node){
+		if(node instanceof TreeNode){
+			var leftHeight = getHeight(node.left);
+			var rightHeight = getHeight(node.right);
+			var myHeight = leftHeight > rightHeight ? leftHeight + 1: rightHeight + 1;
+			node.height = myHeight;
+		}
+	};
+	
+	
+	
+	/* public variables */
+	function _c(){
+		this.root = null;
+		this.settings = new Settings();
+	};
+		_c.root = null;
+		_c.settings = new Settings();
+		
+	/* public functions */
+	var _p = _c.prototype;
+	
+	_c.preOrderTraversal = _p.preOrderTraversal = function(shout,argument,croot){
+		croot = croot || this.root;
+		if(typeof shout === 'function' && croot instanceof TreeNode){
+			shout(croot,argument);
+			if(croot.left instanceof TreeNode){
+				_c.preOrderTraversal(shout,argument,croot.left);
+			}
+			if(croot.right instanceof TreeNode){
+				_c.preOrderTraversal(shout,argument,croot.right);
+			}
+		}
+	};
+	
+	_c.inOrderTraversal = _p.inOrderTraversal = function(shout,argument,croot){
+		croot = croot || this.root;
+		if(typeof shout === 'function' && croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
+				_c.inOrderTraversal(shout,argument,croot.left);
+			}
+			shout(croot,argument);
+			if(croot.right instanceof TreeNode){
+				_c.inOrderTraversal(shout,argument,croot.right);
+			}
+		}
+	};
+	
+	_c.postOrderTraversal = _p.postOrderTraversal = function(shout,argument,croot){
+		croot = croot || this.root;
+		if(typeof shout === 'function' && croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
+				_c.postOrderTraversal(shout,argument,croot.left);
+			}
+			if(croot.right instanceof TreeNode){
+				_c.postOrderTraversal(shout,argument,croot.right);
+			}
+			shout(croot,argument);
+		}
+	};
+	
+	_c.directionToGo = _p.directionToGo = function(node,key){
+		if(node instanceof TreeNode && this.settings instanceof Settings){
+			var nodeKey = node.key;
+			if(this.settings.orientation > 0){
+				if(key > nodeKey){
+					return 1;
+				}else if(key < nodeKey){
+					return -1;
+				}else if(key === nodeKey){
+					return 0;
+				}
+			}else if(this.settings.orientation< 0){
+				if(key < nodeKey){
+					return 1;
+				}else if(key > nodeKey){
+					return -1;
+				}else if(key === nodeKey){
+					return 0;
+				}
+			}
+		}
+	};
+	
+	_c.insert = _p.insert = function(key,data,croot){
+		var returningNode = null;
+		if(typeof key === 'number' && typeof data === 'object'){
+			croot = croot || this.root;
+			if(croot instanceof TreeNode){
+				var direction = this.directionToGo(croot,key);
+				if(direction > 0){
+					if(croot.right instanceof TreeNode){
+						returningNode = this.insert(key,data,croot.right);
+					}else if(croot.right === null){
+						croot.right = new TreeNode(key,data);
+						returningNode = croot.right;
+					}
+				}else if(direction < 0){
+					if(croot.left instanceof TreeNode){
+						returningNode = this.insert(key,data,croot.left);
+					}else if(croot.left === null){
+						croot.left = new TreeNode(key,data,croot);
+						returningNode = croot.left;
+					}
+				}else if(direction === 0){
+					returningNode = null;
+				}
+				this.balanceNode(croot);
+			}else if(this.root === null){
+				this.root = new TreeNode(key,data);
+				returningNode = this.root;
+			}
+			return returningNode;
+		}
+		
+	};
+	
+	_c.detailsOf = _p.detailsOf = function(input,croot){
+		croot = croot || this.root;
+		var ReturnPack = function(exist,parent,node,side){
+			this.exist = exist;
+			this.parent = parent;
+			this.node = node;
+			this.side = side;
+		};
+		var returnNotFound = function(){
+			return new ReturnPack(false,null,null,NaN);
+		};
+		
+		if(croot instanceof TreeNode){
+			if(input instanceof TreeNode || typeof input === 'number'){
+				var key = typeof input === 'number' ? input : input.key;
+				var direction = this.directionToGo(croot,key);
+				if(direction > 0){
+					var right = croot.right;
+					if(right instanceof TreeNode){
+						if(right.key === key){
+							return new ReturnPack(true,croot,right,1);
+						}else{
+							return this.detailsOf(key,right);
+						}
+					}else if(right === null){
+						return returnNotFound();
+					}
+				}else if(direction < 0){
+					var left = croot.left;
+					if(left instanceof TreeNode){
+						if(left.key === key){
+							return new ReturnPack(true,croot,left,-1);
+						}else{
+							return this.detailsOf(key,left);
+						}
+					}else if(left === null){
+						return returnNotFound();
+					}
+				}else if(direction === 0){
+					return new ReturnPack(true,null,croot,0);
+				};
+			}else if(typeof input === 'object'){
+				var data = input;
+				this._searchTemp = null;
+				var searchingFunction = function(node,data){
+					if(this._searchTemp === null && node instanceof TreeNode){
+						if(node.data === data){
+							this._searchTemp = node.key;
+						}
+					}
+				};
+				this.preOrderTraversal(searchingFunction,data);
+				var key = this._searchTemp;
+				this._searchTemp = undefined;
+				if(typeof key == 'number'){
+					return this.detailsOf(key);
+				}else{
+					return returnNotFound();
+				}
+				
+			}
+		}else if(croot === null){
+			return returnNotFound();
+		}
+		
+	};
+	
+	_c.exist = _p.exist = function(input){
+		var detail = this.detailsOf(input);
+		var exist = detail.exist;
+		delete detail;
+		return exist;
+	};
+	
+	_c.find = _p.find = function(input){
+		var detail = this.detailsOf(input);
+		var node = detail.node;
+		delete detail;
+		return node;
+	};
+	
+	_c.getData = _p.getData = function(key){
+		if(typeof key === 'number'){
+			var node = this.find(key);
+			if(node instanceof TreeNode){
+				return node.data;
+			}else if(node === null){
+				return null;
+			}
+		}
+	};
+	
+	_c.parentOf = _p.parentOf = function(input){
+		var detail = this.detailsOf(input);
+		var parent = detail.parent;
+		delete detail;
+		return parent;
+	};
+	
+	_c.sideFromParent = _p.sideFromParent = function(input){
+		var detail = this.detailsOf(input);
+		var side = detail.side;
+		delete detail;
+		return side;
+	};
+	
+	_c.rotateLeft = _p.rotateLeft = function(croot){
+		if(croot instanceof TreeNode && croot.right instanceof TreeNode){
+			var parent = this.parentOf(croot);
+			var side = this.sideFromParent(croot);
+			var root = croot;
+			var right = croot.right;
+			var rightLeft = croot.right.left;
+			root.right = rightLeft;
+			right.left = root;
+			if(side > 0){
+				parent.right = right;
+			}else if(side < 0){
+				parent.left = right;
+			}else if(side === 0){
+				this.root = right;
+			}
+			this.updateTreeHeight();
+		}
+	};
+
+	_c.rotateRight = _p.rotateRight = function(croot){
+		if(croot instanceof TreeNode && croot.left instanceof TreeNode){
+			var parent = this.parentOf(croot);
+			var side = this.sideFromParent(croot);
+			var root = croot;
+			var left = croot.left;
+			var leftRight = croot.left.right;
+			root.left = leftRight;
+			left.right = root;
+			if(side > 0){
+				parent.right = left;
+			}else if(side < 0){
+				parent.left = left;
+			}else if(side === 0){
+				this.root = left;
+			}
+			this.updateTreeHeight();
+		}
+	};
+	
+	_c.balanceNode = _p.balanceNode = function(node){
+		updateNodeHeight(node);
+		if(this.settings instanceof Settings){
+			if(this.settings.balanceEnable){
+				var balance = getBalance(node);
+				if(balance >= 2){
+					var rightBalance = getBalance(node.right);
+					if(rightBalance < 0){
+						this.rotateRight(node.right);
+					}
+					this.rotateLeft(node);
+					//this.balanceNode(node);
+				}else if(balance <= -2){
+					var leftBalance = getBalance(node.left);
+					if(leftBalance > 0){
+						this.rotateLeft(node.left);
+					}
+					this.rotateRight(node);
+					//this.balanceNode(node);
+				}
+			}
+		}
+	};
+	
+	_c.leftMost = _p.leftMost = function(croot){
+		croot = croot || this.root;
+		if(croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
+				return this.leftMost(croot.left);
+			}else if(croot.left === null){
+				return this;
+			}
+		}else if(croot === null){
+			return null;
+		}
+	};
+	
+	_c.rightMost = _p.rightMost = function(croot){
+		croot = croot || this.root;
+		if(croot instanceof TreeNode){
+			if(croot.right instanceof TreeNode){
+				return this.rightMost(croot.right);
+			}else if(croot.right === null){
+				return this;
+			}
+		}else if(croot === null){
+			return null;
+		}
+	};
+	
+	_c.switchChild = _p.switchChild = function(croot){
+		croot = croot || this.root;
+		if(croot instanceof TreeNode){
+			if(croot.left instanceof TreeNode){
+				this.switchChild(croot.left);
+			}
+			if(croot.right instanceof TreeNode){
+				this.switchChild(croot.right);
+			}
+			var temp = croot.left;
+			croot.left = croot.right;
+			croot.right = temp;
+		}
+	};
+	
+	_c.updateTreeHeight = _p.updateTreeHeight = function(){
+		this.postOrderTraversal(updateNodeHeight);
+	};
+	
+	_c.balanceTree = _p.balanceTree = function(){
+		this.postOrderTraversal(this.balanceNode);
+	};
+	
+	
+	return _c;
+})();
+
+window.AVLTreeDisplay = {
+	size: {
+		nodeDiameter: 40,
+		nodeWidth: 60,
+		nullNodeWidth: 20,
+		lineWidth: 2,
+		marginX: 10,
+		marginY: 70,
+		containerWidth: 800
+	},
+	settings: {
+		animationSpeed: 1,
+		bounceHeight: 40,
+		showBalance: false,
+		showHeight: false,
+		showNull: false,
+		shape: 'classic',
+		stepByStep: false,
+		bounceOnStep: false,
+		animatedRedo: false,
+		mute : true
+	},
+	
+	tree: AVLTree,
+	
+	data: function(key){
+		this.width = 0;
+		this.positionX = 0;
+		this.positionY = 0;
+		this.div = AVLTreeDisplay.createNode(key);
+		this.div.host = this;
+		this.leftLine = AVLTreeDisplay.createLine();
+		this.leftLine.host = this;
+		this.rightLine = AVLTreeDisplay.createLine();
+		this.rightLine.host = this;
+		this.node = null;
+	},
+	
+	createLine: function(){
+		var line = new SimpleLine(0,0,0,0,this.size.lineWidth,'line');
+		return line;
+	},
+	
+	createNode: function(key,x,y){
+		var div = document.createElement('div');
+		x = x || this.size.containerWidth / 2 - this.size.nodeDiameter / 2;
+		y = y || 0 - this.size.nodeDiameter;
+		TweenMax.set(div,{
+			left: x,
+			top: y,
+			className: 'node',
+		});
+		div.innerHTML = key;
+		return div;
+	},
+	
+	calculateWidth: function(node){
+		node = node || this.tree.root;
+		if(node !== null){
+			var width = this.size.marginX;
+			if(node.left === null){
+				width += this.size.nullNodeWidth;
+			}else{
+				width += this.calculateWidth(node.left);
+			}
+			if(node.right === null){
+				width += this.size.nullNodeWidth;
+			}else{
+				width += this.calculateWidth(node.right);
+			}
+			node.data.width = width;
+			return width;
+		}
+	},
+	
+	calculatePosition: function(node){
+		if(this.tree.root !== null){
+			if(!node){
+				this.calculateWidth();
+				this.tree.root.data.positionX = this.size.containerWidth / 2 
+											  - this.size.nodeDiameter / 2;
+				this.tree.root.data.positionY = this.size.marginY;
+			}
+			node = node || this.tree.root;
+			if(node.left !== null){
+				node.left.data.positionX = node.data.positionX 
+										 - node.data.width / 2 
+										 + node.left.data.width / 2;
+				node.left.data.positionY = node.data.positionY 
+										 + this.size.marginY;
+				this.calculatePosition(node.left);
+			}
+			if(node.right !== null){
+				node.right.data.positionX = node.data.positionX 
+										  + node.data.width / 2 
+										  - node.right.data.width / 2;
+				node.right.data.positionY = node.data.positionY
+										  + this.size.marginY;
+				this.calculatePosition(node.right);
+			}
+		}
+	},
+	
+	rootLine: null,
+	
+	renderLine: function(node){
+		console.log('update');
+		if(this.tree.root === null){
+			this.rootLine.setTo(this.size.containerWidth / 2, 
+								this.size.marginY
+							   );
+		}else{
+			var container = document.getElementById('AVLTreeDemoContainer');
+			var containerRect = container.getBoundingClientRect();
+			var scrollLeft = container.scrollLeft;
+			var scrollTop = container.scrollTop;
+			var offsetLeft = this.size.nodeDiameter / 2 - containerRect.left + scrollLeft;
+			var offsetTop = this.size.nodeDiameter / 2 - containerRect.top + scrollTop;
+			if(!node){
+				var rootRect = this.tree.root.data.div.getBoundingClientRect();
+				var rootLeft = rootRect.left + offsetLeft;
+				var rootTop = rootRect.top + offsetTop;
+				this.rootLine.setTo(rootLeft,rootTop);
+			}
+			node = node || this.tree.root;
+			var nodeRect = node.data.div.getBoundingClientRect();
+			var nodeLeft = nodeRect.left + offsetLeft;
+			var nodeTop = nodeRect.top + offsetTop;
+
+			if(node.left !== null){
+				var leftRect = node.left.data.div.getBoundingClientRect();
+				var leftLeft = leftRect.left + offsetLeft;
+				var leftTop = leftRect.top + offsetTop;
+				node.data.leftLine.show();
+				node.data.leftLine.setTo(nodeLeft,nodeTop,leftLeft,leftTop);
+				this.renderLine(node.left);
+			}else{
+				node.data.leftLine.hide();
+			}
+			if(node.right !== null){
+				var rightRect = node.right.data.div.getBoundingClientRect();
+				var rightLeft = rightRect.left + offsetLeft;
+				var rightTop = rightRect.top + offsetTop;
+				node.data.rightLine.show();
+				node.data.rightLine.setTo(nodeLeft,nodeTop,rightLeft,rightTop);
+				this.renderLine(node.right);
+			}else{
+				node.data.rightLine.hide();
+			}
+		}
+	},
+	
+	init: function(){
+		this.rootLine = this.createLine();
+		this.rootLine.setTo(this.size.containerWidth / 2, 
+							this.size.marginY,
+							this.size.containerWidth / 2 + 1, 
+							0 - this.size.marginY
+						   );
+		$(this.rootLine.div).addClass('rootLine');
+		$('#AVLTreeDemoContainer').append(this.rootLine.div);
+	}
+	
+};
+
+var AVLTreeAnimation = {
+	globalTimeline: new TimelineMax({
+		onUpdate: AVLTreeDisplay.renderLine,
+		onUpdateScope: AVLTreeDisplay
+
+		}),
+	init: function(){
+		
+	}
+};
+
+
+/*
+AVLTreeDisplay.renderLeft = function(croot){
+	var line = croot.data.leftLine;
+	if(croot.left !== null){
+		line.style.visibility = "visible";
+		var mainBoardRect = document.getElementById("AVLTreeDemoContainer").getBoundingClientRect();
+		var hostRect = croot.data.myDiv.getBoundingClientRect();
+		var childRect = croot.left.data.myDiv.getBoundingClientRect();
+		var x = hostRect.left + AVLTreeDisplay.nodeSize.diameter / 2;
+		var y = hostRect.top + AVLTreeDisplay.nodeSize.diameter / 2;
+		var childX = childRect.left + AVLTreeDisplay.nodeSize.diameter / 2;
+		var childY = childRect.top + AVLTreeDisplay.nodeSize.diameter / 2;
+		var transformation = AVLTreeDisplay.transform(childX - x,childY - y);
+		TweenLite.set(line,{left:x-mainBoardRect.left,top:y-mainBoardRect.top,width: transformation.length,rotation: transformation.angle});
+	}else{
+		line.style.visibility = "hidden";
+	}
+};
+
+AVLTreeDisplay.renderRight = function(croot){
+	var line = croot.data.rightLine;
+	if(croot.right !== null){
+		line.style.visibility = "visible";
+		var mainBoardRect = document.getElementById("AVLTreeDemoContainer").getBoundingClientRect();
+		var hostRect = croot.data.myDiv.getBoundingClientRect();
+		var childRect = croot.right.data.myDiv.getBoundingClientRect();
+		var x = hostRect.left + AVLTreeDisplay.nodeSize.diameter / 2;
+		var y = hostRect.top + AVLTreeDisplay.nodeSize.diameter / 2;
+		var childX = childRect.left + AVLTreeDisplay.nodeSize.diameter / 2;
+		var childY = childRect.top + AVLTreeDisplay.nodeSize.diameter / 2;
+		var transformation = AVLTreeDisplay.transform(childX - x,childY - y);
+		TweenLite.set(line,{left:x-mainBoardRect.left,top:y-mainBoardRect.top,width: transformation.length,rotation: transformation.angle});
+	}else{
+		line.style.visibility = "hidden";
+	}
+};*/
+
+
+
+AVLTreeDisplay.insert = function(key){
+	var data = new AVLTreeDisplay.data(key);
+	var node = AVLTree.insert(key,data);
+	if(node !== null){
+		data.myNode = node;
+		$('#AVLTreeDemoContainer').append([data.div,data.leftLine.div,data.rightLine.div]);
+	}else{
+		//data.destroy();
+	}
+};
+
+AVLTreeDisplay.remove = function(key){
+	var removingData = AVLTree.remove(AVLTree.root,key);
+	if( removingData !== null){
+		removingData.leftLine.parentNode.removeChild(removingData.leftLine);
+		removingData.rightLine.parentNode.removeChild(removingData.rightLine);
+		TweenLite.to(removingData.myDiv,1,{top:"+=400",autoAlpha:0});
+		delete removingData;
+	}
+};
+
+/*
+AVLTreeDisplay.calculateWidth = function(croot){
+	var width = AVLTreeDisplay.margin.x;
+	if(croot.left === null){
+		width += AVLTreeDisplay.nodeSize.nullWidth;
+	}else{
+		width += AVLTreeDisplay.calculateWidth(croot.left);
+	}
+	if(croot.right === null){
+		width += AVLTreeDisplay.nodeSize.nullWidth;
+	}else{
+		width += AVLTreeDisplay.calculateWidth(croot.right);
+	}
+	croot.data.width = width;
+	return width;
+};
+
+AVLTreeDisplay.calculatePosition = function(croot){
+	if(croot !== null){
+		if(croot.parent === null){
+			AVLTreeDisplay.calculateWidth(croot);
+			AVLTree.root.data.positionX = AVLTreeDisplay.mainBoardWidth / 2 - AVLTreeDisplay.nodeSize.diameter / 2;
+			AVLTree.root.data.positionY = AVLTreeDisplay.margin.y / 2;
+		}
+		if(croot.left !== null){
+			croot.left.data.positionX = croot.data.positionX - croot.data.width / 2 + croot.left.data.width / 2;
+			croot.left.data.positionY = croot.data.positionY + AVLTreeDisplay.margin.y;
+			AVLTreeDisplay.calculatePosition(croot.left);
+		}
+		if(croot.right !== null){
+			croot.right.data.positionX = croot.data.positionX + croot.data.width / 2 - croot.right.data.width / 2;
+			croot.right.data.positionY = croot.data.positionY + AVLTreeDisplay.margin.y;
+			AVLTreeDisplay.calculatePosition(croot.right);
+		}
+	}
+};
+*/
+
+AVLTreeDisplay.renderNode = function(croot){
+	AVLTreeAnimation.globalTimeline.to(croot.data.div,0.5,
+		{
+			left: croot.data.positionX,
+			top: croot.data.positionY,
+			ease: Back.easeOut
+		},0);
+};
+
+/*
+AVLTreeDisplay.renderLine = function(croot){
+	AVLTreeDisplay.renderLeft(croot);
+	AVLTreeDisplay.renderRight(croot);
+};
+
+*/
+AVLTreeDisplay.renderTree = function(){
+	this.calculatePosition();
+	this.tree.inOrderTraversal(this.renderNode);
+};
+
+window.AVLTreeControl = {
+	
+};
+
+AVLTreeControl.init = function(){
+	var i;
+	for(i=0;i<10;i++){
+		var key = Math.floor(Math.random()*100);
+		AVLTreeDisplay.insert(key);
+	}
+	AVLTreeDisplay.renderTree();
+};
+
+AVLTreeControl.insert = function(){
+	var key = parseInt(document.getElementById("input").value);
+	AVLTreeDisplay.insert(key);
+	AVLTreeDisplay.renderTree();
+	AVLTreeAnimation.globalTimeline.restart();
+};
+
+AVLTreeControl.remove = function(){
+	var key = document.getElementById("input").value;
+	AVLTreeDisplay.remove(key);
+	AVLTreeDisplay.renderTree();
+};
+	
+</script>
+		
 	</head>
 	<body onload="AVLTreeDisplay.init();AVLTreeAnimation.init();AVLTreeControl.init();">
 		<h1>AVL Tree Visualiztion</h1>
