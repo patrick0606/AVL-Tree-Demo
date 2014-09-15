@@ -6,10 +6,52 @@
 		<meta name="author" content="Patrick Huang">
 		<meta name="keywords" content="AVL Tree, Binary Search Tree, Data structure">
 		<meta name="description" content="AVL tree visualization in HTML5">
-		<link rel="stylesheet" href="css/AVLTreeStylesheet.css">
+		<style>
+			h1 {
+	text-align: center;
+}
+
+#AVLTreeDemoContainer {
+	position: relative;
+	border: 1px solid black;
+	height: 400px;
+	width: 800px;
+	margin: auto;
+	text-align: center;
+	overflow: scroll;
+}
+
+#interface {
+	margin: 10px;
+	text-align: center;
+}
+
+#AVLTreeDemoContainer .node {
+	position: absolute;
+	height: 36px;
+	width: 36px;
+
+	border-radius: 100%;
+	border: 2px solid black;
+	background-color: #ff6600;
+	font: 18px Arial,Sans-serif;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 2;
+}
+
+#AVLTreeDemoContainer .line {
+	position: absolute;
+	z-index: -1;
+	background-color: #000000;
+}
+
+#AVLTreeDemoContainer .hidden {
+	visibility: hidden;
+}
+		</style>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenMax.min.js"></script>
-		<script src="js/SimpleLine.js"></script>
 		<script>
 	window.SimpleLine = window.SimpleLine || (function(){
 	
